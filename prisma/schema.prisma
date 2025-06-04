@@ -10,40 +10,44 @@ generator client {
 }
 
 model User {
-  id            String         @id @default(uuid())
-  email         String         @unique
-  username      String         @unique
+  id            String       @id @default(uuid())
+  email         String       @unique
+  username      String       @unique
   name          String?
-  createdAt     DateTime       @default(now())
-  quizResponse  QuizResponse?
-  stacks        StackItem[]
+  createdAt     DateTime     @default(now())
   socialLinks   Json?
+  quizResponses QuizResponse[]
+  // Link to UserStack (the join table)
+  stacks        UserStack[]
 }
 
-model StackItem {
-  id           String   @id @default(uuid())
-  userId       String
-  title        String
-  imageUrl     String?
-  linkUrl      String?
-  category     String   // e.g. "Language", "Framework", etc.
-  position     Int      // ordering index within that category
-  createdAt    DateTime @default(now())
-
-  user         User     @relation(fields: [userId], references: [id])
+// This Table replaces your old "RecommendedStack"
+// All canonical tech/items live here
+model Item {
+  id        String      @id @default(uuid())
+  title     String      @unique                   // e.g. "VSCode"
+  imageUrl  String                                   
+  linkUrl   String?                                 
+  category  String      // e.g. "Editor", "Language", etc.
+  users     UserStack[] // back‐relation from join table
 }
 
-model RecommendedStack {
-  id           String   @id @default(uuid())
-  title        String
-  imageUrl     String
-  linkUrl      String?
-  category     String
+// Join table between User <-> Item, with a "position" field for ordering
+model UserStack {
+  userId    String
+  itemId    String
+  position  Int       @default(0)    // ordering index per user
+  createdAt DateTime  @default(now())
+
+  user      User      @relation(fields: [userId], references: [id])
+  item      Item      @relation(fields: [itemId], references: [id])
+
+  @@id([userId, itemId])               // composite primary key
 }
 
 model QuizResponse {
   id            String   @id @default(uuid())
-  userId        String?  @unique       // ← MAKE UNIQUE for one-to-one
+  userId        String?  
   sessionId     String   @unique
   questionPairs Json
   chosen        Json

@@ -70,14 +70,16 @@ async function main() {
       linkUrl: "https://www.docker.com/",
       category: "Tool",
     },
+    // … add as many as you like …
   ];
 
-  await prisma.recommendedStack.createMany({
+  // Use createMany with skipDuplicates, since title is unique
+  await prisma.item.createMany({
     data: items,
     skipDuplicates: true,
   });
 
-  console.log("✅ RecommendedStack table seeded.");
+  console.log("✅ Item table seeded.");
 }
 
 main()

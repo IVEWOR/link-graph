@@ -1,28 +1,29 @@
+// components/QuizApp.jsx
 "use client";
 
 import { useState, useEffect } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Quiz from "./Quiz";
-import MockProfile from "./MockProfile";
 import { createBrowserSupabase } from "@/utils/supabase/client";
 
 export default function QuizApp() {
   const [questions, setQuestions] = useState(null);
-  const [mockStacks, setMockStacks] = useState(null);
   const [sessionId, setSessionId] = useState(null);
   const searchParams = useSearchParams();
   const router = useRouter();
   const supabase = createBrowserSupabase();
 
-  // (1) Fetch the quiz questions on mount
+  // (1) Fetch the quiz questions when this mounts
   useEffect(() => {
     fetch("/api/quiz/generate")
       .then((res) => res.json())
-      .then((data) => setQuestions(data.questions))
+      .then((data) => {
+        setQuestions(data.questions);
+      })
       .catch((err) => console.error("Failed to load quiz:", err));
   }, []);
 
-  // (2) Called when the user finishes the quiz
+  // (2) When user finishes the quiz, POST to /api/quiz/save, stash result in sessionStorage, then redirect
   const handleFinish = async ({ chosen }) => {
     const newSessionId = crypto.randomUUID();
     setSessionId(newSessionId);
@@ -38,19 +39,27 @@ export default function QuizApp() {
         }),
       });
       const json = await res.json();
-      setMockStacks(json.mockStacks);
+      // json.mockStacks is an array of { id, title, imageUrl, category }
+      // Save it to sessionStorage so our new /mock-profile page can read it:
+      sessionStorage.setItem(
+        `mock_${newSessionId}`,
+        JSON.stringify(json.mockStacks)
+      );
+
+      // Now push the user to /mock-profile?sessionId=…
+      router.push(`/mock-profile?sessionId=${newSessionId}`);
     } catch (error) {
       console.error("Error saving quiz:", error);
     }
   };
 
-  // (3) After OAuth redirect: if URL has "?sessionId=..." AND the user is logged in, run attach
+  // (3) If we arrive here with ?sessionId=… (after Google OAuth), attempt to attach.
+  // Exactly the same logic as before.
   useEffect(() => {
     const paramSid = searchParams.get("sessionId");
     if (!paramSid) return;
 
     async function attachQuiz() {
-      console.log("🚀 attachQuiz triggered with sessionId:", paramSid);
       const {
         data: { session },
       } = await supabase.auth.getSession();
@@ -60,26 +69,19 @@ export default function QuizApp() {
         return;
       }
 
-      // Call our backend endpoint
       const res = await fetch("/api/quiz/attach", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ sessionId: paramSid }),
       });
-
       const data = await res.json();
-      console.log("📤 /api/quiz/attach response:", data);
 
       if (res.ok) {
-        // Fetch user info (so we know username)
         const {
           data: { user },
         } = await supabase.auth.getUser();
-
-        // Derive username—adapt if your User table stores it somewhere else
         const username =
           user.user_metadata.username || user.email.split("@")[0];
-        console.log("ℹ️ Redirecting to edit:", username);
         router.replace(`/u/${username}/edit`);
       } else {
         console.error("❌ attachQuiz failed:", data);
@@ -89,12 +91,14 @@ export default function QuizApp() {
     attachQuiz();
   }, [searchParams, supabase, router]);
 
-  // (4) Render logic
+  // (4) Render: if we have questions but no sessionId redirect yet, show the Quiz.
+  // We don’t render a “MockProfile” inline anymore—because that now lives on /mock-profile.
   if (!questions) {
-    return <div className="text-center mt-12">Loading quiz…</div>;
-  }
-  if (mockStacks) {
-    return <MockProfile mockStacks={mockStacks} sessionId={sessionId} />;
+    return (
+      <div className="text-center mt-12 pixel-text text-cyan-400">
+        Loading quiz…
+      </div>
+    );
   }
   return <Quiz questions={questions} onFinish={handleFinish} />;
 }

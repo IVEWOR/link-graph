@@ -1,63 +1,111 @@
+// components/Quiz.jsx
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export default function Quiz({ questions, onFinish }) {
-  // answers[i] will hold either questions[i].left or questions[i].right
+  // Track the index of the question currently shown (0-based).
+  const [currentQuestion, setCurrentQuestion] = useState(0);
+
+  // Track all selected answers in order.
+  // answers[i] will hold the user’s choice (string) for question i.
   const [answers, setAnswers] = useState(Array(questions.length).fill(null));
 
-  const selectAnswer = (idx, choice) => {
+  // When the user picks a choice for the current question:
+  const selectAnswer = (choice) => {
+    // Record answer for the current question
     const newAnswers = [...answers];
-    newAnswers[idx] = choice;
+    newAnswers[currentQuestion] = choice;
     setAnswers(newAnswers);
+
+    // If there are more questions, move to the next; otherwise trigger onFinish
+    if (currentQuestion < questions.length - 1) {
+      // Move to next question after a short delay (so the user sees the click effect)
+      setTimeout(() => {
+        setCurrentQuestion((idx) => idx + 1);
+      }, 200);
+    } else {
+      // Last question answered: wait a moment, then call onFinish
+      setTimeout(() => {
+        onFinish({ chosen: newAnswers });
+      }, 200);
+    }
   };
 
-  const allAnswered = answers.every((ans) => ans !== null);
+  // Pull out the question object we need to display right now:
+  const q = questions[currentQuestion];
+
+  // Decide right‐choice neon color: if q.right === "LIGHT_MODE", use white; otherwise cyan
+  const rightIsLightMode = q.right === "LIGHT_MODE";
 
   return (
-    <div className="max-w-xl mx-auto my-12">
-      <h1 className="text-2xl font-semibold mb-6">Which one do you prefer?</h1>
-      {questions.map((q, idx) => (
-        <div
-          key={idx}
-          className="flex justify-between items-center mb-4 p-4 border rounded"
-        >
-          <button
-            className={`px-4 py-2 rounded transition ${
-              answers[idx] === q.left
-                ? "bg-blue-200"
-                : "bg-gray-100 hover:bg-gray-200"
-            }`}
-            onClick={() => selectAnswer(idx, q.left)}
-          >
-            {q.left}
-          </button>
-
-          <span className="text-sm text-gray-500">vs.</span>
-
-          <button
-            className={`px-4 py-2 rounded transition ${
-              answers[idx] === q.right
-                ? "bg-blue-200"
-                : "bg-gray-100 hover:bg-gray-200"
-            }`}
-            onClick={() => selectAnswer(idx, q.right)}
-          >
-            {q.right}
-          </button>
+    <section className="py-20 px-4 bg-black min-h-[80vh]">
+      <div className="max-w-4xl mx-auto">
+        {/* Heading + Progress Dots */}
+        <div className="text-center mb-12">
+          <h2 className="text-4xl font-black text-green-400 mb-4 pixel-text retro-flicker">
+            &gt; DETECT_DEV_STYLE.EXE
+          </h2>
+          <p className="text-lg text-cyan-400 mb-8 pixel-text">
+            // Quick quiz to personalize your profile
+          </p>
+          <div className="flex justify-center space-x-2">
+            {questions.map((_, idx) => (
+              <div
+                key={idx}
+                className={`w-4 h-4 border-2 transition-all duration-300 ${
+                  idx < currentQuestion
+                    ? "bg-green-400 border-green-400" // already answered
+                    : idx === currentQuestion
+                    ? "bg-green-400 border-green-400" // current question
+                    : "bg-black border-green-400" // future question
+                }`}
+              />
+            ))}
+          </div>
         </div>
-      ))}
 
-      {allAnswered && (
-        <div className="text-center mt-6">
-          <button
-            onClick={() => onFinish({ chosen: answers })}
-            className="px-6 py-3 bg-green-500 text-white rounded hover:bg-green-600 transition"
-          >
-            See My Mock Profile
-          </button>
+        {/* Single question box */}
+        <div className="border-4 border-green-400 bg-black p-8 pixel-text">
+          <p className="text-center text-cyan-400 mb-6 text-lg overflow-hidden">
+            QUESTION_{currentQuestion + 1}_OF_{questions.length}
+          </p>
+
+          <div className="grid grid-cols-2 gap-6">
+            {/* LEFT CHOICE */}
+            <button
+              onClick={() => selectAnswer(q.left)}
+              className={`p-6 border-4 border-green-400 text-green-400 font-bold text-xl retro-pulse transition-transform duration-200 hover:scale-105 ${
+                answers[currentQuestion] === q.left
+                  ? "bg-gray-900"
+                  : "bg-black hover:bg-gray-800"
+              }`}
+            >
+              {q.left}
+            </button>
+
+            {/* RIGHT CHOICE */}
+            <button
+              onClick={() => selectAnswer(q.right)}
+              className={`p-6 border-4 ${
+                rightIsLightMode
+                  ? "border-white text-white"
+                  : "border-cyan-400 text-cyan-400"
+              } font-bold text-xl retro-pulse transition-transform duration-200 hover:scale-105 ${
+                answers[currentQuestion] === q.right
+                  ? "bg-gray-900"
+                  : "bg-black hover:bg-gray-800"
+              }`}
+            >
+              {q.right}
+            </button>
+          </div>
+
+          <p className="mt-6 text-center text-gray-400 text-sm pixel-text">
+            // Click to choose
+          </p>
         </div>
-      )}
-    </div>
+      </div>
+    </section>
   );
 }

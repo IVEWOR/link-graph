@@ -1,26 +1,174 @@
-@import "tailwindcss";
+/* app/globals.css */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
+@layer base {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: 0 0% 0%;
+    --foreground: 120 100% 50%;
+    --retro-green: #00ff00;
+    --retro-cyan: #00ffff;
+    --retro-magenta: #ff00ff;
+    --retro-white: #ffffff;
+
+    --card: 0 0% 5%;
+    --card-foreground: 120 100% 50%;
+
+    --popover: 0 0% 5%;
+    --popover-foreground: 120 100% 50%;
+
+    --primary: 120 100% 50%;
+    --primary-foreground: 0 0% 0%;
+
+    --secondary: 180 100% 50%;
+    --secondary-foreground: 0 0% 0%;
+
+    --muted: 0 0% 10%;
+    --muted-foreground: 120 50% 75%;
+
+    --accent: 300 100% 50%;
+    --accent-foreground: 0 0% 0%;
+
+    --destructive: 0 100% 50%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 120 100% 25%;
+    --input: 120 100% 25%;
+    --ring: 120 100% 50%;
+
+    --radius: 0rem;
+  }
+
+  /* Light mode overrides */
+  .light {
+    --background: 0 0% 95%;
+    --foreground: 0 0% 0%;
+    background: #f0f0f0;
   }
 }
 
-body {
-  /* background: var(--background);
-  color: var(--foreground); */
-  font-family: Arial, Helvetica, sans-serif;
+@layer base {
+  /* We no longer apply bg-background or text-foreground on body */
+  /* We still set the font here: */
+  body {
+    font-family: "Courier New", monospace;
+  }
+
+  /* 8-bit pixel animations */
+  @keyframes pixel-flicker {
+    0%,
+    100% {
+      opacity: 1;
+      text-shadow: 0 0 5px currentColor;
+    }
+    50% {
+      opacity: 0.8;
+      text-shadow: 0 0 10px currentColor, 0 0 20px currentColor;
+    }
+  }
+
+  @keyframes pixel-scroll {
+    0% {
+      transform: translateX(100%);
+    }
+    100% {
+      transform: translateX(-100%);
+    }
+  }
+
+  @keyframes pixel-bounce {
+    0%,
+    20%,
+    50%,
+    80%,
+    100% {
+      transform: translateY(0);
+    }
+    40% {
+      transform: translateY(-10px);
+    }
+    60% {
+      transform: translateY(-5px);
+    }
+  }
+
+  @keyframes retro-pulse {
+    0%,
+    100% {
+      box-shadow: 0 0 5px var(--retro-green), inset 0 0 5px var(--retro-green);
+    }
+    50% {
+      box-shadow: 0 0 15px var(--retro-green), inset 0 0 10px var(--retro-green);
+    }
+  }
+
+  @keyframes scanlines {
+    0% {
+      transform: translateY(-100%);
+    }
+    100% {
+      transform: translateY(100vh);
+    }
+  }
+
+  .pixel-text {
+    font-family: "Courier New", monospace;
+    font-weight: bold;
+    text-shadow: 2px 2px 0px #000;
+    image-rendering: pixelated;
+  }
+
+  .retro-flicker {
+    animation: pixel-flicker 2s ease-in-out infinite;
+  }
+
+  .retro-bounce {
+    animation: pixel-bounce 2s ease-in-out infinite;
+  }
+
+  .retro-pulse {
+    animation: retro-pulse 2s ease-in-out infinite;
+  }
+
+  /* Scanlines effect */
+  .scanlines::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(transparent 50%, rgba(0, 255, 0, 0.05) 50%);
+    background-size: 100% 4px;
+    pointer-events: none;
+    animation: scanlines 0.1s linear infinite;
+  }
+
+  /* Pixelated grid */
+  .pixel-grid {
+    background-image: linear-gradient(rgba(0, 255, 0, 0.1) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0, 255, 0, 0.1) 1px, transparent 1px);
+    background-size: 8px 8px;
+    image-rendering: pixelated;
+  }
+
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 12px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: #000;
+    border: 1px solid var(--retro-green);
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: var(--retro-green);
+    border: 1px solid #000;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--retro-cyan);
+  }
 }

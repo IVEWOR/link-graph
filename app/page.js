@@ -4,6 +4,7 @@ import Footer from "@/components/Footer";
 import ThemeToggle from "@/components/ThemeToggle";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import QuizApp from "@/components/QuizApp";
+import React from "react";
 
 const Index = () => {
   return (
@@ -12,7 +13,11 @@ const Index = () => {
         <ThemeToggle />
         <Hero />
         <Features />
-        <QuizApp />
+        <React.Suspense
+          fallback={<div className="text-center py-12">Loading quiz…</div>}
+        >
+          <QuizApp />
+        </React.Suspense>
         <Footer />
       </div>
     </ThemeProvider>

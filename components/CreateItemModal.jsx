@@ -15,7 +15,6 @@ export default function CreateItemModal({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
 
-  // Cloudinary settings from env
   const CLOUD_NAME = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
   const UPLOAD_PRESET = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET;
 
@@ -35,7 +34,6 @@ export default function CreateItemModal({
     try {
       let imageUrl = "";
 
-      // 1) If user selected an image, upload it to Cloudinary
       if (imageFile) {
         const formData = new FormData();
         formData.append("file", imageFile);
@@ -43,19 +41,13 @@ export default function CreateItemModal({
 
         const cloudRes = await fetch(
           `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/upload`,
-          {
-            method: "POST",
-            body: formData,
-          }
+          { method: "POST", body: formData }
         );
         const cloudData = await cloudRes.json();
-        if (!cloudRes.ok) {
-          throw new Error("Cloudinary upload failed");
-        }
+        if (!cloudRes.ok) throw new Error("Cloudinary upload failed");
         imageUrl = cloudData.secure_url;
       }
 
-      // 2) Call our API to create the item
       const apiRes = await fetch("/api/item", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -67,11 +59,8 @@ export default function CreateItemModal({
         }),
       });
       const apiData = await apiRes.json();
-      if (!apiRes.ok) {
-        throw new Error(apiData.error || "Failed to create item");
-      }
+      if (!apiRes.ok) throw new Error(apiData.error || "Failed to create item");
 
-      // 3) Notify the parent that the item was created
       onCreated(apiData.item);
       onClose();
     } catch (err) {
@@ -84,47 +73,46 @@ export default function CreateItemModal({
 
   return (
     <div
-      className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50"
+      className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-80 z-50"
       onClick={onClose}
     >
       <div
-        className="bg-white rounded-lg shadow-xl w-full max-w-md p-6 relative"
         onClick={(e) => e.stopPropagation()}
+        className="relative bg-black border-4 border-cyan-400 p-6 rounded-lg pixel-text text-green-400 retro-pulse max-w-md w-full"
       >
-        <h2 className="text-2xl font-semibold mb-4">Create New Item</h2>
+        <h2 className="text-2xl font-bold text-cyan-400 mb-4 pixel-text">
+          CREATE_NEW_ITEM
+        </h2>
+
+        {errorMsg && <p className="text-red-500 mb-2 pixel-text">{errorMsg}</p>}
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          {errorMsg && <p className="text-red-600 text-sm">{errorMsg}</p>}
-
           {/* Title */}
           <div>
-            <label className="block text-sm font-medium mb-1" htmlFor="title">
-              Title <span className="text-red-500">*</span>
+            <label htmlFor="title" className="block mb-1 pixel-text">
+              TITLE <span className="text-red-500">*</span>
             </label>
             <input
               id="title"
+              type="text"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              type="text"
-              className="w-full border rounded px-3 py-2 focus:outline-none focus:ring"
               placeholder="e.g. Elixir"
               required
+              className="w-full px-3 py-2 border-2 border-green-400 bg-black text-green-400 pixel-text focus:outline-none"
             />
           </div>
 
           {/* Category */}
           <div>
-            <label
-              className="block text-sm font-medium mb-1"
-              htmlFor="category"
-            >
-              Category
+            <label htmlFor="category" className="block mb-1 pixel-text">
+              CATEGORY
             </label>
             <select
               id="category"
               value={category}
               onChange={(e) => setCategory(e.target.value)}
-              className="w-full border rounded px-3 py-2 focus:outline-none focus:ring"
+              className="w-full px-3 py-2 border-2 border-green-400 bg-black text-green-400 pixel-text focus:outline-none"
             >
               <option>Other</option>
               <option>Language</option>
@@ -138,66 +126,66 @@ export default function CreateItemModal({
 
           {/* Link URL */}
           <div>
-            <label className="block text-sm font-medium mb-1" htmlFor="linkUrl">
-              Official Link (optional)
+            <label htmlFor="linkUrl" className="block mb-1 pixel-text">
+              OFFICIAL_LINK (optional)
             </label>
             <input
               id="linkUrl"
+              type="url"
               value={linkUrl}
               onChange={(e) => setLinkUrl(e.target.value)}
-              type="url"
-              className="w-full border rounded px-3 py-2 focus:outline-none focus:ring"
               placeholder="https://example.com"
+              className="w-full px-3 py-2 border-2 border-green-400 bg-black text-green-400 pixel-text focus:outline-none"
             />
           </div>
 
           {/* Image Upload */}
           <div>
-            <label
-              className="block text-sm font-medium mb-1"
-              htmlFor="imageFile"
-            >
-              Icon Image (optional)
+            <label htmlFor="imageFile" className="block mb-1 pixel-text">
+              ICON_IMAGE (optional)
             </label>
             <input
               id="imageFile"
               type="file"
               accept="image/*"
               onChange={handleImageChange}
-              className="w-full text-sm"
+              className="w-full text-sm pixel-text"
             />
             {imageFile && (
-              <p className="mt-1 text-xs text-gray-500">
+              <p className="mt-1 text-xs text-gray-500 pixel-text">
                 Selected: {imageFile.name}
               </p>
             )}
           </div>
 
-          <div className="flex justify-end space-x-2 mt-4">
+          {/* Buttons */}
+          <div className="flex justify-end space-x-4 mt-4">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300"
               disabled={isSubmitting}
+              className="px-4 py-2 border-2 border-cyan-400 text-cyan-400 pixel-text hover:bg-cyan-400 hover:text-black transition"
+              style={{ borderRadius: 0 }}
             >
-              Cancel
+              CANCEL
             </button>
             <button
               type="submit"
-              className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
               disabled={isSubmitting}
+              className="px-4 py-2 border-2 border-green-400 text-green-400 pixel-text hover:bg-green-400 hover:text-black transition disabled:opacity-50"
+              style={{ borderRadius: 0 }}
             >
-              {isSubmitting ? "Creating..." : "Create Item"}
+              {isSubmitting ? "CREATING..." : "CREATE"}
             </button>
           </div>
         </form>
 
-        {/* Close “×” button */}
+        {/* Close “×” */}
         <button
           onClick={onClose}
-          className="absolute top-3 right-3 text-gray-500 hover:text-gray-700"
+          className="absolute top-3 right-3 text-cyan-400 hover:text-white pixel-text"
         >
-          &times;
+          ×
         </button>
       </div>
     </div>

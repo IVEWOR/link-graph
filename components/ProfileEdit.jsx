@@ -19,17 +19,74 @@ import {
   sortableKeyboardCoordinates,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { createBrowserSupabase } from "@/utils/supabase/client";
 import CreateItemModal from "@/components/CreateItemModal";
+import { createBrowserSupabase } from "@/utils/supabase/client";
 
 export default function ProfileEdit({ userStacks, allItems }) {
+  // supabase client for profile info
   const supabase = createBrowserSupabase();
 
-  // Prevent SSR mismatch
+  // SSR guard
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
 
-  // Build initial stacks state
+  // --- PROFILE INFO STATE ---
+  const [profile, setProfile] = useState({
+    name: "",
+    username: "",
+    socialLinks: [], // [{ platform:"", url:"" }, ...]
+  });
+
+  // load existing profile info on mount
+  useEffect(() => {
+    (async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (user) {
+        // assume your user metadata contains these
+        setProfile({
+          name: user.user_metadata.name || "",
+          username: user.user_metadata.username || "",
+          socialLinks: user.user_metadata.socialLinks || [],
+        });
+      }
+    })();
+  }, [supabase]);
+
+  // handle profile form changes
+  const updateField = (field, value) =>
+    setProfile((p) => ({ ...p, [field]: value }));
+
+  const updateLink = (idx, key, value) => {
+    setProfile((p) => {
+      const links = [...p.socialLinks];
+      links[idx] = { ...links[idx], [key]: value };
+      return { ...p, socialLinks: links };
+    });
+  };
+
+  const addLink = () =>
+    setProfile((p) => ({
+      ...p,
+      socialLinks: [...p.socialLinks, { platform: "", url: "" }],
+    }));
+
+  const removeLink = (idx) =>
+    setProfile((p) => {
+      const links = p.socialLinks.filter((_, i) => i !== idx);
+      return { ...p, socialLinks: links };
+    });
+
+  const saveProfile = async () => {
+    const { error } = await supabase.auth.updateUser({
+      user_metadata: profile,
+    });
+    if (error) console.error(error);
+    else alert("Profile updated!");
+  };
+
+  // --- DND/STACK EDITOR STATE (unchanged) ---
   const initialStacks = useMemo(
     () =>
       userStacks.map((us) => ({
@@ -42,27 +99,17 @@ export default function ProfileEdit({ userStacks, allItems }) {
     [userStacks]
   );
   const [stacks, setStacks] = useState(initialStacks);
-
-  // Sidebar + modal state
   const [sidebarSearch, setSidebarSearch] = useState("");
   const [modalOpen, setModalOpen] = useState(false);
   const [modalInitialTitle, setModalInitialTitle] = useState("");
-
-  // DnD sensors
-  const sensors = useSensors(
-    useSensor(PointerSensor),
-    useSensor(KeyboardSensor, {
-      coordinateGetter: sortableKeyboardCoordinates,
-    })
-  );
-
-  // Track currently dragged item
   const [activeId, setActiveId] = useState(null);
 
-  const handleDragStart = ({ active }) => {
-    setActiveId(active.id);
-  };
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+  );
 
+  const handleDragStart = ({ active }) => setActiveId(active.id);
   const handleDragEnd = useCallback(
     async (event) => {
       const { active, over } = event;
@@ -71,8 +118,6 @@ export default function ProfileEdit({ userStacks, allItems }) {
         const newIndex = stacks.findIndex((s) => s.itemId === over.id);
         const newStacks = arrayMove(stacks, oldIndex, newIndex);
         setStacks(newStacks);
-
-        // Persist positions
         for (let i = 0; i < newStacks.length; i++) {
           await fetch("/api/user-stack", {
             method: "PATCH",
@@ -85,18 +130,12 @@ export default function ProfileEdit({ userStacks, allItems }) {
     },
     [stacks]
   );
+  const handleDragCancel = () => setActiveId(null);
 
-  const handleDragCancel = () => {
-    setActiveId(null);
-  };
-
-  // Remove item
   const handleRemove = async (itemId) => {
     await fetch(`/api/user-stack?itemId=${itemId}`, { method: "DELETE" });
     setStacks((prev) => prev.filter((s) => s.itemId !== itemId));
   };
-
-  // Add existing item
   const handleAdd = async (itemId) => {
     const position = stacks.length;
     await fetch("/api/user-stack", {
@@ -105,19 +144,9 @@ export default function ProfileEdit({ userStacks, allItems }) {
       body: JSON.stringify({ itemId, position }),
     });
     const item = allItems.find((it) => it.id === itemId);
-    setStacks((prev) => [
-      ...prev,
-      {
-        itemId: item.id,
-        title: item.title,
-        imageUrl: item.imageUrl,
-        category: item.category,
-        position,
-      },
-    ]);
+    setStacks((prev) => [...prev, { ...item, position }]);
   };
 
-  // Sidebar filtering
   const existingIds = new Set(stacks.map((s) => s.itemId));
   const filteredSidebar = allItems.filter(
     (it) =>
@@ -125,16 +154,16 @@ export default function ProfileEdit({ userStacks, allItems }) {
       it.title.toLowerCase().includes(sidebarSearch.toLowerCase())
   );
 
-  // Group stacks by category
-  const groupedStacks = useMemo(() => {
-    return stacks.reduce((acc, s) => {
-      if (!acc[s.category]) acc[s.category] = [];
-      acc[s.category].push(s);
-      return acc;
-    }, {});
-  }, [stacks]);
+  const groupedStacks = useMemo(
+    () =>
+      stacks.reduce((acc, s) => {
+        if (!acc[s.category]) acc[s.category] = [];
+        acc[s.category].push(s);
+        return acc;
+      }, {}),
+    [stacks]
+  );
 
-  // Modal controls
   const openCreateModal = () => {
     setModalInitialTitle(sidebarSearch.trim());
     setModalOpen(true);
@@ -144,6 +173,7 @@ export default function ProfileEdit({ userStacks, allItems }) {
     handleAdd(newItem.id);
   };
 
+  // ── RENDER ──
   return (
     <div className="min-h-screen relative bg-black pixel-grid scanlines text-green-400 overflow-hidden">
       {/* Floating neon pixels */}
@@ -155,7 +185,115 @@ export default function ProfileEdit({ userStacks, allItems }) {
       </div>
 
       <div className="relative z-10 flex flex-col md:flex-row gap-8 px-4 py-12">
-        {/* Sidebar */}
+        {/* ── LEFT: Profile Info ── */}
+        <div className="md:w-1/4 space-y-4">
+          <h2 className="text-xl font-bold pixel-text">PROFILE INFO</h2>
+          <div>
+            <label className="block mb-1 pixel-text">NAME</label>
+            <input
+              value={profile.name}
+              onChange={(e) => updateField("name", e.target.value)}
+              className="w-full px-3 py-2 border-2 border-green-400 bg-black text-green-400 pixel-text"
+            />
+          </div>
+          <div>
+            <label className="block mb-1 pixel-text">USERNAME</label>
+            <input
+              value={profile.username}
+              onChange={(e) => updateField("username", e.target.value)}
+              className="w-full px-3 py-2 border-2 border-green-400 bg-black text-green-400 pixel-text"
+            />
+          </div>
+
+          <h3 className="mt-4 text-lg font-bold pixel-text">SOCIAL LINKS</h3>
+          {profile.socialLinks.map((link, i) => (
+            <div key={i} className="flex space-x-2">
+              <input
+                placeholder="Platform"
+                value={link.platform}
+                onChange={(e) => updateLink(i, "platform", e.target.value)}
+                className="flex-1 px-2 py-1 border-2 border-green-400 bg-black text-green-400 pixel-text"
+              />
+              <input
+                placeholder="URL"
+                value={link.url}
+                onChange={(e) => updateLink(i, "url", e.target.value)}
+                className="flex-1 px-2 py-1 border-2 border-green-400 bg-black text-green-400 pixel-text"
+              />
+              <button
+                onClick={() => removeLink(i)}
+                className="px-2 text-red-500 pixel-text"
+              >
+                ×
+              </button>
+            </div>
+          ))}
+          <button
+            onClick={addLink}
+            className="mt-2 px-3 py-2 border-2 border-cyan-400 text-cyan-400 pixel-text hover:bg-cyan-400 hover:text-black transition"
+            style={{ borderRadius: 0 }}
+          >
+            + ADD LINK
+          </button>
+
+          <button
+            onClick={saveProfile}
+            className="mt-4 w-full px-4 py-2 border-2 border-green-400 text-black bg-green-400 pixel-text hover:bg-green-300 transition"
+            style={{ borderRadius: 0 }}
+          >
+            SAVE PROFILE
+          </button>
+        </div>
+
+        {/* ── CENTER: Stack Editor ── */}
+        <div className="flex-1">
+          <h2 className="text-xl font-bold mb-4 pixel-text">YOUR STACK</h2>
+          {!mounted ? (
+            <p className="text-gray-500 pixel-text">Loading editor…</p>
+          ) : (
+            <DndContext
+              sensors={sensors}
+              collisionDetection={closestCenter}
+              onDragStart={handleDragStart}
+              onDragEnd={handleDragEnd}
+              onDragCancel={handleDragCancel}
+            >
+              <SortableContext
+                items={stacks.map((s) => s.itemId)}
+                strategy={rectSortingStrategy}
+              >
+                {Object.entries(groupedStacks).map(([category, items]) => (
+                  <div key={category} className="mb-8">
+                    <h3 className="text-lg font-semibold mb-2 pixel-text">
+                      {category.toUpperCase()}
+                    </h3>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+                      {items.map((s) => (
+                        <SortableCard
+                          key={s.itemId}
+                          itemId={s.itemId}
+                          title={s.title}
+                          imageUrl={s.imageUrl}
+                          onRemove={handleRemove}
+                          isActive={activeId === s.itemId}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </SortableContext>
+              <DragOverlay>
+                {activeId && (
+                  <OverlayCard
+                    item={stacks.find((s) => s.itemId === activeId)}
+                  />
+                )}
+              </DragOverlay>
+            </DndContext>
+          )}
+        </div>
+
+        {/* ── RIGHT: Sidebar ── */}
         <div className="md:w-1/4 space-y-4">
           <h2 className="text-xl font-bold pixel-text">ADD AN ITEM</h2>
           <input
@@ -207,69 +345,21 @@ export default function ProfileEdit({ userStacks, allItems }) {
               <p className="text-gray-500 pixel-text">No items</p>
             )}
           </div>
-        </div>
 
-        {/* Main Canvas */}
-        <div className="flex-1">
-          <h2 className="text-xl font-bold mb-4 pixel-text">YOUR STACK</h2>
-
-          {!mounted ? (
-            <p className="text-gray-500 pixel-text">Loading editor…</p>
-          ) : (
-            <DndContext
-              sensors={sensors}
-              collisionDetection={closestCenter}
-              onDragStart={handleDragStart}
-              onDragEnd={handleDragEnd}
-              onDragCancel={handleDragCancel}
-            >
-              <SortableContext
-                items={stacks.map((s) => s.itemId)}
-                strategy={rectSortingStrategy}
-              >
-                {Object.entries(groupedStacks).map(([category, items]) => (
-                  <div key={category} className="mb-8">
-                    <h3 className="text-lg font-semibold mb-2 pixel-text">
-                      {category.toUpperCase()}
-                    </h3>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-                      {items.map((s) => (
-                        <SortableCard
-                          key={s.itemId}
-                          itemId={s.itemId}
-                          title={s.title}
-                          imageUrl={s.imageUrl}
-                          onRemove={handleRemove}
-                          isActive={activeId === s.itemId}
-                        />
-                      ))}
-                    </div>
-                  </div>
-                ))}
-              </SortableContext>
-
-              <DragOverlay>
-                {activeId && (
-                  <OverlayCard
-                    item={stacks.find((s) => s.itemId === activeId)}
-                  />
-                )}
-              </DragOverlay>
-            </DndContext>
+          {modalOpen && (
+            <CreateItemModal
+              initialTitle={modalInitialTitle}
+              onClose={() => setModalOpen(false)}
+              onCreated={handleItemCreated}
+            />
           )}
         </div>
       </div>
-
-      {modalOpen && (
-        <CreateItemModal
-          initialTitle={modalInitialTitle}
-          onClose={() => setModalOpen(false)}
-          onCreated={handleItemCreated}
-        />
-      )}
     </div>
   );
 }
+
+// ...SortableCard and OverlayCard unchanged...
 
 function SortableCard({ itemId, title, imageUrl, onRemove }) {
   const {

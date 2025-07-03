@@ -1,132 +1,78 @@
-// /components/Features.jsx
-import { Code2, Zap, Youtube } from "lucide-react";
+// components/Features.jsx
+"use client";
+import { Code2, Wand2, Share2 } from "lucide-react";
+import { motion } from "framer-motion"; // <-- ADDED THIS MISSING IMPORT
 
 const Features = () => {
   const features = [
     {
-      icon: <Code2 className="h-16 w-16 text-green-400" strokeWidth={3} />,
-      title: "TECH_STACK.EXE",
+      icon: <Code2 className="h-8 w-8 text-indigo-500" />,
+      title: "Showcase Your Stack",
       description:
-        "Display your programming languages, frameworks, and dev tools with interactive skill meters.",
-      color: "border-green-400",
+        "Visually represent your favorite programming languages, frameworks, and developer tools with our interactive components.",
     },
     {
-      icon: <Zap className="h-16 w-16 text-cyan-400" strokeWidth={3} />,
-      title: "CREATOR_KIT.BIN",
+      icon: <Wand2 className="h-8 w-8 text-purple-500" />,
+      title: "Display Your Kit",
       description:
-        "Show off your streaming setup, gaming rig, and content creation hardware arsenal.",
-      color: "border-cyan-400",
+        "From your streaming setup to your gaming rig, show off the hardware and software that powers your creativity.",
     },
     {
-      icon: <Youtube className="h-16 w-16 text-white" strokeWidth={3} />,
-      title: "SOCIAL_HUB.SYS",
+      icon: <Share2 className="h-8 w-8 text-emerald-500" />,
+      title: "Unify Your Presence",
       description:
-        "Connect all platforms, showcase content, and give your audience one unified link portal.",
-      color: "border-white",
+        "Consolidate all your social platforms, projects, and content into one beautiful, shareable link.",
     },
   ];
 
-  return (
-    <section className="py-24 px-4 relative bg-black">
-      {/* Floating pixels background */}
-      <div className="absolute inset-0 overflow-hidden">
-        {[...Array(20)].map((_, i) => (
-          <div
-            key={i}
-            className={`absolute w-2 h-2 ${
-              i % 3 === 0
-                ? "bg-green-400"
-                : i % 3 === 1
-                ? "bg-cyan-400"
-                : "bg-white"
-            } retro-bounce`}
-            style={{
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-              animationDelay: `${Math.random() * 2}s`,
-            }}
-          ></div>
-        ))}
-      </div>
+  const containerVariants = {
+    hidden: {},
+    visible: { transition: { staggerChildren: 0.2 } },
+  };
 
-      <div className="max-w-7xl mx-auto relative z-10">
-        <div className="text-center mb-20">
-          <h2 className="text-5xl md:text-7xl font-black text-green-400 mb-8 pixel-text retro-flicker">
-            &gt; BUILT_FOR_
+  const itemVariants = {
+    hidden: { y: 20, opacity: 0 },
+    visible: { y: 0, opacity: 1, transition: { duration: 0.5 } },
+  };
+
+  return (
+    <section className="py-24 px-4 bg-white dark:bg-[#111115]">
+      <div className="max-w-6xl mx-auto">
+        <div className="text-center mb-16">
+          <h2 className="text-4xl md:text-5xl font-bold tracking-tight text-gray-900 dark:text-white">
+            Everything You Are, in One Simple Link
           </h2>
-          <h2 className="text-5xl md:text-7xl font-black text-cyan-400 pixel-text">
-            CREATORS_
-          </h2>
-          <div className="mt-8 p-4 border-2 border-green-400 bg-black max-w-4xl mx-auto">
-            <p className="text-xl text-green-400 pixel-text">
-              // Whether coding or streaming, showcase your complete digital
-              identity
-            </p>
-          </div>
+          <p className="text-lg text-gray-600 dark:text-gray-400 mt-4 max-w-3xl mx-auto">
+            LinkGraph provides the tools you need to build a comprehensive
+            digital portfolio that grows with you.
+          </p>
         </div>
 
-        <div className="grid lg:grid-cols-3 gap-8 mb-16">
+        <motion.div
+          className="grid md:grid-cols-3 gap-8"
+          variants={containerVariants}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, amount: 0.3 }}
+        >
           {features.map((feature, index) => (
-            <div
+            <motion.div
               key={index}
-              className={`group relative bg-black border-4 ${feature.color} p-8 hover:bg-gray-900 transition-all duration-300 hover:scale-105 retro-pulse`}
+              variants={itemVariants}
+              className="bg-white dark:bg-gray-900/50 border border-gray-200 dark:border-gray-800 rounded-2xl p-8"
             >
-              <div className="mb-8 transform group-hover:scale-110 transition-transform duration-300">
+              <div className="inline-flex items-center justify-center w-16 h-16 rounded-xl mb-6 bg-gray-100 dark:bg-gray-800">
                 {feature.icon}
               </div>
-              <h3 className="text-2xl font-bold text-white mb-6 pixel-text group-hover:retro-flicker">
+              <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
                 {feature.title}
               </h3>
-              <p className="text-gray-300 leading-relaxed text-lg pixel-text">
+              <p className="text-gray-600 dark:text-gray-400 leading-relaxed">
                 {feature.description}
               </p>
-            </div>
+            </motion.div>
           ))}
-        </div>
-
-        {/* Terminal-style platform showcase */}
-        <div className="border-4 border-green-400 bg-black p-12">
-          <div className="text-center mb-8">
-            <h3 className="text-4xl font-bold text-green-400 pixel-text retro-flicker">
-              &gt; CONNECT_PLATFORMS.BAT
-            </h3>
-          </div>
-          <div className="grid grid-cols-3 gap-8 max-w-2xl mx-auto">
-            <div className="text-center group cursor-pointer">
-              <div className="border-4 border-green-400 bg-black p-6 group-hover:bg-gray-900 transition-colors duration-300 retro-pulse">
-                <Youtube
-                  className="h-12 w-12 text-green-400 mx-auto"
-                  strokeWidth={3}
-                />
-              </div>
-              <span className="text-green-400 pixel-text mt-2 block">
-                YOUTUBE
-              </span>
-            </div>
-            <div className="text-center group cursor-pointer">
-              <div className="border-4 border-cyan-400 bg-black p-6 group-hover:bg-gray-900 transition-colors duration-300 retro-pulse">
-                <Zap
-                  className="h-12 w-12 text-cyan-400 mx-auto"
-                  strokeWidth={3}
-                />
-              </div>
-              <span className="text-cyan-400 pixel-text mt-2 block">
-                TWITCH
-              </span>
-            </div>
-            <div className="text-center group cursor-pointer">
-              <div className="border-4 border-white bg-black p-6 group-hover:bg-gray-900 transition-colors duration-300 retro-pulse">
-                <Code2
-                  className="h-12 w-12 text-white mx-auto"
-                  strokeWidth={3}
-                />
-              </div>
-              <span className="text-white pixel-text mt-2 block">
-                X/TWITTER
-              </span>
-            </div>
-          </div>
-        </div>
+        </motion.div>
       </div>
     </section>
   );

@@ -1,3 +1,9 @@
+/*
+================================================================================
+  FILE: components/QuizApp.jsx
+  PURPOSE: Container for the redesigned quiz.
+================================================================================
+*/
 // components/QuizApp.jsx
 "use client";
 
@@ -8,97 +14,54 @@ import { createBrowserSupabase } from "@/utils/supabase/client";
 
 export default function QuizApp() {
   const [questions, setQuestions] = useState(null);
-  const [sessionId, setSessionId] = useState(null);
-  const searchParams = useSearchParams();
-  const router = useRouter();
-  const supabase = createBrowserSupabase();
 
-  // (1) Fetch the quiz questions when this mounts
   useEffect(() => {
     fetch("/api/quiz/generate")
       .then((res) => res.json())
-      .then((data) => {
-        setQuestions(data.questions);
-      })
-      .catch((err) => console.error("Failed to load quiz:", err));
+      .then((data) => setQuestions(data.questions));
   }, []);
 
-  // (2) When user finishes the quiz, POST to /api/quiz/save, stash result in sessionStorage, then redirect
+  const router = useRouter();
   const handleFinish = async ({ chosen }) => {
     const newSessionId = crypto.randomUUID();
-    setSessionId(newSessionId);
-
-    try {
-      const res = await fetch("/api/quiz/save", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          sessionId: newSessionId,
-          questionPairs: questions,
-          chosen,
-        }),
-      });
-      const json = await res.json();
-      // json.mockStacks is an array of { id, title, imageUrl, category }
-      // Save it to sessionStorage so our new /mock-profile page can read it:
-      sessionStorage.setItem(
-        `mock_${newSessionId}`,
-        JSON.stringify(json.mockStacks)
-      );
-
-      // Now push the user to /mock-profile?sessionId=…
-      router.push(`/mock-profile?sessionId=${newSessionId}`);
-    } catch (error) {
-      console.error("Error saving quiz:", error);
-    }
+    const res = await fetch("/api/quiz/save", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        sessionId: newSessionId,
+        questionPairs: questions,
+        chosen,
+      }),
+    });
+    const json = await res.json();
+    sessionStorage.setItem(
+      `mock_${newSessionId}`,
+      JSON.stringify(json.mockStacks)
+    );
+    router.push(`/mock-profile?sessionId=${newSessionId}`);
   };
 
-  // (3) If we arrive here with ?sessionId=… (after Google OAuth), attempt to attach.
-  // Exactly the same logic as before.
-  useEffect(() => {
-    const paramSid = searchParams.get("sessionId");
-    if (!paramSid) return;
+  return (
+    <section id="quiz" className="py-24 px-4 bg-gray-50 dark:bg-[#0B0B0F]">
+      <div className="max-w-4xl mx-auto">
+        <div className="text-center mb-16">
+          <h2 className="text-4xl md:text-5xl font-bold tracking-tight text-gray-900 dark:text-white">
+            Find Your Perfect Stack
+          </h2>
+          <p className="text-lg text-gray-600 dark:text-gray-400 mt-4 max-w-3xl mx-auto">
+            Answer a few quick questions to generate a personalized profile with
+            technologies and tools that match your style.
+          </p>
+        </div>
 
-    async function attachQuiz() {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-
-      if (!session?.user) {
-        console.warn("⚠️ attachQuiz: no logged-in session found");
-        return;
-      }
-
-      const res = await fetch("/api/quiz/attach", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ sessionId: paramSid }),
-      });
-      const data = await res.json();
-
-      if (res.ok) {
-        const {
-          data: { user },
-        } = await supabase.auth.getUser();
-        const username =
-          user.user_metadata.username || user.email.split("@")[0];
-        router.replace(`/u/${username}/edit`);
-      } else {
-        console.error("❌ attachQuiz failed:", data);
-      }
-    }
-
-    attachQuiz();
-  }, [searchParams, supabase, router]);
-
-  // (4) Render: if we have questions but no sessionId redirect yet, show the Quiz.
-  // We don’t render a “MockProfile” inline anymore—because that now lives on /mock-profile.
-  if (!questions) {
-    return (
-      <div className="text-center mt-12 pixel-text text-cyan-400">
-        Loading quiz…
+        {!questions ? (
+          <div className="text-center py-20 text-gray-500 dark:text-gray-400">
+            Loading...
+          </div>
+        ) : (
+          <Quiz questions={questions} onFinish={handleFinish} />
+        )}
       </div>
-    );
-  }
-  return <Quiz questions={questions} onFinish={handleFinish} />;
+    </section>
+  );
 }

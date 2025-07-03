@@ -1,130 +1,103 @@
+/*
+================================================================================
+  FILE: components/Hero.jsx
+  PURPOSE: The fully redesigned, premium hero section.
+  NOTE: This component uses `framer-motion`. Install with `npm install framer-motion`
+================================================================================
+*/
 // components/Hero.jsx
 "use client";
 
-import { ArrowDown, Zap, Code2, Youtube, Twitter, Twitch } from "lucide-react";
-import { useTheme } from "@/contexts/ThemeContext";
+import { ArrowRight } from "lucide-react";
+import { motion } from "framer-motion";
+import React from "react";
 
 const Hero = () => {
-  const { theme } = useTheme();
-
   const scrollToQuiz = () => {
     document.getElementById("quiz")?.scrollIntoView({ behavior: "smooth" });
   };
 
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: { opacity: 1, transition: { staggerChildren: 0.15 } },
+  };
+
+  const itemVariants = {
+    hidden: { y: 20, opacity: 0 },
+    visible: {
+      y: 0,
+      opacity: 1,
+      transition: { duration: 0.5, ease: "easeOut" },
+    },
+  };
+
   return (
-    <div className="relative min-h-screen flex items-center justify-center px-4 overflow-hidden bg-black scanlines">
-      {/* 8-bit pixelated grid background */}
-      <div className="absolute inset-0 pixel-grid opacity-30"></div>
+    <section className="relative min-h-screen flex items-center justify-center py-24 px-4 overflow-hidden">
+      {/* Background Grid */}
+      <div className="absolute inset-0 z-0 h-full w-full bg-white dark:bg-[#0B0B0F] bg-[linear-gradient(to_right,#f0f0f0_1px,transparent_1px),linear-gradient(to_bottom,#f0f0f0_1px,transparent_1px)] dark:bg-[linear-gradient(to_right,rgba(255,255,255,0.05)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.05)_1px,transparent_1px)] bg-[size:36px_36px]"></div>
 
-      {/* Floating pixels */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div
-          className="absolute top-20 left-10 w-4 h-4 bg-green-400 retro-bounce"
-          style={{ animationDelay: "0s" }}
-        ></div>
-        <div
-          className="absolute top-40 right-20 w-4 h-4 bg-cyan-400 retro-bounce"
-          style={{ animationDelay: "0.5s" }}
-        ></div>
-        <div
-          className="absolute bottom-32 left-1/4 w-4 h-4 bg-green-400 retro-bounce"
-          style={{ animationDelay: "1s" }}
-        ></div>
-        <div
-          className="absolute top-60 right-1/3 w-4 h-4 bg-cyan-400 retro-bounce"
-          style={{ animationDelay: "1.5s" }}
-        ></div>
+      {/* Gradient Glow Effect */}
+      <div
+        className="absolute top-1/2 left-1/2 w-[80vw] h-[80vh] -translate-x-1/2 -translate-y-1/2 bg-[radial-gradient(circle_at_center,_rgba(124,58,237,0.15)_0%,_rgba(124,58,237,0)_50%)]"
+        aria-hidden="true"
+      ></div>
 
-        {/* Moving scanline (green horizontal bar) */}
-        <div className="absolute inset-0 pointer-events-none">
-          <div
-            className="w-full h-1 bg-green-400 opacity-50 animate-pulse"
-            style={{ animation: "scanlines 3s linear infinite" }}
-          ></div>
-        </div>
-      </div>
+      <motion.div
+        className="relative z-10 text-center max-w-4xl mx-auto"
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+      >
+        <motion.div
+          variants={itemVariants}
+          className="inline-block bg-indigo-100 dark:bg-gray-800 text-indigo-700 dark:text-gray-300 text-sm font-semibold px-4 py-1.5 rounded-full mb-6 ring-1 ring-inset ring-indigo-200 dark:ring-gray-700"
+        >
+          For Developers, Designers & Creators
+        </motion.div>
 
-      <div className="relative z-10 text-center max-w-5xl mx-auto">
-        {/* Retro header with pixel art style */}
-        <div className="flex items-center justify-center space-x-4 mb-8">
-          <div className="relative retro-pulse">
-            <Code2 className="h-16 w-16 text-green-400" strokeWidth={3} />
-          </div>
-          <h1 className="text-6xl md:text-8xl font-black text-green-400 pixel-text retro-flicker">
-            LINKGRAPH
-          </h1>
-        </div>
+        <motion.h1
+          variants={itemVariants}
+          className="text-5xl md:text-7xl font-black tracking-tight text-gray-900 dark:text-white"
+        >
+          Your Digital Identity, Reimagined.
+        </motion.h1>
 
-        {/* 8-bit style tagline */}
-        <div className="mb-8 space-y-4">
-          <p className="text-2xl md:text-3xl font-bold text-cyan-400 pixel-text">
-            &gt; THE <span className="text-white retro-flicker">ULTIMATE</span>{" "}
-            CREATOR HUB_
-          </p>
-          <p className="text-lg md:text-xl text-green-300 pixel-text">
-            // Built by devs, for devs & creators
-          </p>
-        </div>
+        <motion.p
+          variants={itemVariants}
+          className="text-lg md:text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto mt-6 mb-12"
+        >
+          LinkGraph is the ultimate creator hub. Beautifully showcase your tech
+          stack, creative tools, gaming setup, and social presence—all in one
+          place.
+        </motion.p>
 
-        {/* Platform indicators - 8-bit style */}
-        <div className="flex justify-center space-x-8 mb-8">
-          <div className="flex items-center space-x-2 border-2 border-green-400 px-4 py-2 bg-black">
-            <Youtube className="h-6 w-6 text-green-400" />
-            <span className="text-green-400 pixel-text">YT</span>
-          </div>
-          <div className="flex items-center space-x-2 border-2 border-cyan-400 px-4 py-2 bg-black">
-            <Twitch className="h-6 w-6 text-cyan-400" />
-            <span className="text-cyan-400 pixel-text">TTV</span>
-          </div>
-          <div className="flex items-center space-x-2 border-2 border-white px-4 py-2 bg-black">
-            <Twitter className="h-6 w-6 text-white" />
-            <span className="text-white pixel-text">X</span>
-          </div>
-        </div>
-
-        {/* Tech showcase - terminal style */}
-        <div className="mb-12 p-6 border-2 border-green-400 bg-black/80 mx-auto max-w-4xl">
-          <p className="text-xl md:text-2xl text-green-400 pixel-text leading-relaxed">
-            <span className="text-cyan-400">$</span> showcase --tech-stack
-            <br />
-            <span className="text-cyan-400">$</span> showcase --gaming-setup
-            <br />
-            <span className="text-cyan-400">$</span> showcase --creator-tools
-            <br />
-            <span className="retro-flicker">_</span>
-          </p>
-        </div>
-
-        {/* 8-bit style buttons */}
-        <div className="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-6 mb-12">
-          <button
+        <motion.div
+          variants={itemVariants}
+          className="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-4"
+        >
+          <motion.button
             onClick={scrollToQuiz}
-            className="bg-green-400 hover:bg-green-300 text-black px-10 py-6 text-xl font-bold border-4 border-green-400 hover:border-green-300 transition-all duration-300 hover:scale-105 pixel-text retro-pulse"
-            style={{ borderRadius: "0" }}
+            whileHover={{
+              scale: 1.05,
+              boxShadow: "0px 10px 30px -5px rgba(0, 0, 0, 0.2)",
+            }}
+            whileTap={{ scale: 0.95 }}
+            className="group inline-flex items-center justify-center bg-gray-900 dark:bg-white text-white dark:text-black px-7 py-3 text-lg font-semibold rounded-full shadow-lg transition-colors duration-300"
           >
-            <Zap className="mr-3 h-6 w-6" />
-            [START_BUILDING]
-          </button>
-          <button
-            className="border-4 border-cyan-400 bg-black text-cyan-400 hover:bg-cyan-400 hover:text-black px-10 py-6 text-xl font-bold transition-all duration-300 pixel-text"
-            style={{ borderRadius: "0" }}
+            Create Your Hub
+            <ArrowRight className="ml-2 h-5 w-5 transition-transform duration-300 group-hover:translate-x-1" />
+          </motion.button>
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            className="group inline-flex items-center justify-center text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white px-7 py-3 text-lg font-semibold transition-colors duration-300 rounded-full"
           >
-            [VIEW_DEMOS]
-          </button>
-        </div>
-
-        {/* Animated scroll indicator */}
-        <div className="retro-bounce cursor-pointer" onClick={scrollToQuiz}>
-          <ArrowDown
-            className="h-10 w-10 text-green-400 mx-auto"
-            strokeWidth={3}
-          />
-          <p className="text-green-300 text-sm mt-2 pixel-text">
-            &gt; DISCOVER_YOUR_STYLE
-          </p>
-        </div>
-      </div>
-    </div>
+            View Examples
+            <ArrowRight className="ml-2 h-4 w-4 transition-transform duration-300 opacity-50 group-hover:opacity-100" />
+          </motion.button>
+        </motion.div>
+      </motion.div>
+    </section>
   );
 };
 

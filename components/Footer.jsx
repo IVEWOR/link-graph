@@ -1,120 +1,133 @@
-// /components/Footer.jsx
-import { Code2, Github, Link } from "lucide-react";
+/*
+================================================================================
+  FILE: components/Footer.jsx
+  PURPOSE: Redesigned footer with a clean, modern layout.
+================================================================================
+*/
+// components/Footer.jsx
+import { Github, Twitter } from "lucide-react";
 
 const Footer = () => {
   return (
-    <footer className="bg-black border-t-4 border-green-400 py-12 px-4">
+    <footer className="bg-white dark:bg-[#111115] border-t border-gray-200 dark:border-gray-800 py-16 px-4">
       <div className="max-w-6xl mx-auto">
-        <div className="grid md:grid-cols-4 gap-8 mb-8">
-          <div className="md:col-span-2">
-            <div className="flex items-center space-x-2 mb-4">
-              <Code2 className="h-8 w-8 text-green-400" strokeWidth={3} />
-              <h3 className="text-2xl font-bold text-green-400 pixel-text">
-                LINKGRAPH
-              </h3>
-            </div>
-            <p className="text-gray-400 mb-4 max-w-md pixel-text">
-              // Modern way for devs to share complete tech identity.
-              <br />
-              // From code to gear, showcase everything unique.
+        <div className="grid md:grid-cols-2 gap-8 mb-8">
+          <div className="">
+            <h3 className="text-xl font-bold text-gray-900 dark:text-white">
+              LinkGraph
+            </h3>
+            <p className="text-gray-600 dark:text-gray-400 mt-2 mb-4 max-w-md">
+              The ultimate creator hub to showcase your complete digital
+              identity.
             </p>
             <div className="flex space-x-4">
-              <div className="border-2 border-cyan-400 p-2 hover:bg-cyan-400 hover:text-black transition-colors cursor-pointer">
-                <Github
-                  className="h-6 w-6 text-cyan-400 hover:text-black"
-                  strokeWidth={3}
-                />
-              </div>
-              <div className="border-2 border-white p-2 hover:bg-white hover:text-black transition-colors cursor-pointer">
-                <Link
-                  className="h-6 w-6 text-white hover:text-black"
-                  strokeWidth={3}
-                />
-              </div>
+              <a
+                href="#"
+                className="text-gray-500 hover:text-gray-900 dark:hover:text-white transition-colors"
+              >
+                <Github className="h-6 w-6" />
+              </a>
+              <a
+                href="#"
+                className="text-gray-500 hover:text-gray-900 dark:hover:text-white transition-colors"
+              >
+                <Twitter className="h-6 w-6" />
+              </a>
             </div>
           </div>
-
-          <div>
-            <h4 className="text-green-400 font-bold mb-4 pixel-text">
-              {">"} PRODUCT
-            </h4>
-            <ul className="space-y-2 text-gray-400 pixel-text">
-              <li>
-                <a href="#" className="hover:text-green-400 transition-colors">
-                  {">"} Features
-                </a>
-              </li>
-              <li>
-                <a href="#" className="hover:text-green-400 transition-colors">
-                  {">"} Pricing
-                </a>
-              </li>
-              <li>
-                <a href="#" className="hover:text-green-400 transition-colors">
-                  {">"} Examples
-                </a>
-              </li>
-              <li>
-                <a href="#" className="hover:text-green-400 transition-colors">
-                  {">"} Templates
-                </a>
-              </li>
-            </ul>
-          </div>
-
-          <div>
-            <h4 className="text-cyan-400 font-bold mb-4 pixel-text">
-              {">"} SUPPORT
-            </h4>
-            <ul className="space-y-2 text-gray-400 pixel-text">
-              <li>
-                <a href="#" className="hover:text-cyan-400 transition-colors">
-                  {">"} Documentation
-                </a>
-              </li>
-              <li>
-                <a href="#" className="hover:text-cyan-400 transition-colors">
-                  {">"} Community
-                </a>
-              </li>
-              <li>
-                <a href="#" className="hover:text-cyan-400 transition-colors">
-                  {">"} Contact
-                </a>
-              </li>
-              <li>
-                <a href="#" className="hover:text-cyan-400 transition-colors">
-                  {">"} Status
-                </a>
-              </li>
-            </ul>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-8">
+            <div>
+              <h4 className="font-semibold text-gray-800 dark:text-gray-200 mb-4">
+                Product
+              </h4>
+              <ul className="space-y-2 text-gray-600 dark:text-gray-400">
+                <li>
+                  <a
+                    href="#"
+                    className="hover:text-indigo-500 dark:hover:text-indigo-400 transition-colors"
+                  >
+                    Features
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="#"
+                    className="hover:text-indigo-500 dark:hover:text-indigo-400 transition-colors"
+                  >
+                    Pricing
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="#"
+                    className="hover:text-indigo-500 dark:hover:text-indigo-400 transition-colors"
+                  >
+                    Examples
+                  </a>
+                </li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="font-semibold text-gray-800 dark:text-gray-200 mb-4">
+                Resources
+              </h4>
+              <ul className="space-y-2 text-gray-600 dark:text-gray-400">
+                <li>
+                  <a
+                    href="#"
+                    className="hover:text-indigo-500 dark:hover:text-indigo-400 transition-colors"
+                  >
+                    Docs
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="#"
+                    className="hover:text-indigo-500 dark:hover:text-indigo-400 transition-colors"
+                  >
+                    Community
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="#"
+                    className="hover:text-indigo-500 dark:hover:text-indigo-400 transition-colors"
+                  >
+                    Contact
+                  </a>
+                </li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="font-semibold text-gray-800 dark:text-gray-200 mb-4">
+                Legal
+              </h4>
+              <ul className="space-y-2 text-gray-600 dark:text-gray-400">
+                <li>
+                  <a
+                    href="#"
+                    className="hover:text-indigo-500 dark:hover:text-indigo-400 transition-colors"
+                  >
+                    Privacy
+                  </a>
+                </li>
+                <li>
+                  <a
+                    href="#"
+                    className="hover:text-indigo-500 dark:hover:text-indigo-400 transition-colors"
+                  >
+                    Terms
+                  </a>
+                </li>
+              </ul>
+            </div>
           </div>
         </div>
 
-        <div className="border-t-2 border-green-400 pt-8 flex flex-col md:flex-row justify-between items-center">
-          <p className="text-gray-400 text-sm pixel-text">
-            // © 2024 LinkGraph. Built with ❤️ for developers.
+        <div className="border-t border-gray-200 dark:border-gray-800 pt-8 flex flex-col sm:flex-row justify-between items-center">
+          <p className="text-gray-500 dark:text-gray-400 text-sm">
+            &copy; 2024 LinkGraph. All rights reserved.
           </p>
-          <div className="flex space-x-6 mt-4 md:mt-0">
-            <a
-              href="#"
-              className="text-gray-400 hover:text-green-400 text-sm transition-colors pixel-text"
-            >
-              {">"} Privacy
-            </a>
-            <a
-              href="#"
-              className="text-gray-400 hover:text-cyan-400 text-sm transition-colors pixel-text"
-            >
-              {">"} Terms
-            </a>
-            <a
-              href="#"
-              className="text-gray-400 hover:text-white text-sm transition-colors pixel-text"
-            >
-              {">"} Cookies
-            </a>
-          </div>
         </div>
       </div>
     </footer>

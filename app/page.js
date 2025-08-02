@@ -13,65 +13,25 @@ import {
   Star,
   Users,
 } from "lucide-react";
+import StackCarousel from "@/components/StackCarousel";
+import Footer from "@/components/Footer";
+import Header from "@/components/Header";
+import Image from "next/image";
 
 // --- Main Page Component ---
 export default function HomePage() {
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-500">
+    <div className="min-h-screen transition-colors duration-500">
       <Header />
-      <main className="container mx-auto px-4 sm:px-6 lg:px-8">
+      <main className="px-4 sm:px-6 lg:px-8">
         <HeroSection />
-        <StackGrid />
+        <StackCarousel />
         <Leaderboard />
       </main>
       <Footer />
     </div>
   );
 }
-
-// --- Header Component ---
-const Header = () => {
-  const [mounted, setMounted] = useState(false);
-  const { theme, setTheme } = useTheme();
-
-  useEffect(() => setMounted(true), []);
-
-  return (
-    <header className="py-4 px-4 sm:px-6 lg:px-8">
-      <div className="container mx-auto flex justify-between items-center">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-          DevStacks
-        </h1>
-        <div className="flex items-center space-x-4">
-          <button
-            aria-label="Toggle Dark Mode"
-            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-            className="p-2 rounded-full text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
-          >
-            {mounted &&
-              (theme === "dark" ? (
-                <Sun className="h-5 w-5" />
-              ) : (
-                <Moon className="h-5 w-5" />
-              ))}
-          </button>
-          <a
-            href="#"
-            className="text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
-          >
-            Log in
-          </a>
-          <a
-            href="#"
-            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
-          >
-            Dashboard
-          </a>
-        </div>
-      </div>
-    </header>
-  );
-};
 
 // --- Hero Section ---
 const HeroSection = () => {
@@ -192,7 +152,7 @@ const Quiz = () => {
 
   if (quizFinished) {
     return (
-      <div className="bg-white dark:bg-gray-800/50 backdrop-blur-sm border border-gray-200 dark:border-gray-700 rounded-xl p-8 shadow-2xl shadow-red-500/10 dark:shadow-green-500/10">
+      <div className="bg-white dark:bg-gray-800/50 backdrop-blur-sm border border-gray-200 dark:border-gray-700 rounded-xl p-8 shadow-2xl shadow-green-500/10">
         <h3 className="text-2xl font-bold text-gray-900 dark:text-white">
           Quiz Complete!
         </h3>
@@ -214,14 +174,14 @@ const Quiz = () => {
   const showExploreButton = answers.length >= 4;
 
   return (
-    <div className="relative bg-white/30 dark:bg-gray-800/30 backdrop-blur-xl border border-red-200/50 dark:border-green-400/30 rounded-2xl p-6 sm:p-8 shadow-2xl shadow-red-500/10 dark:shadow-green-500/10 transition-all duration-500">
-      <div className="absolute -top-3 -left-3 w-16 h-16 bg-red-300/50 dark:bg-green-400/50 rounded-full blur-2xl animate-pulse"></div>
-      <div className="absolute -bottom-3 -right-3 w-16 h-16 bg-green-300/50 dark:bg-red-400/50 rounded-full blur-2xl animate-pulse delay-500"></div>
+    <div className="relative bg-white/30 dark:bg-gray-800/30 backdrop-blur-xl border border-green-400/20 dark:border-green-400/30 rounded-2xl p-6 sm:p-8 shadow-2xl shadow-green-500/10 transition-all duration-500">
+      <div className="absolute -top-3 -left-3 w-16 h-16 bg-green-300/50 dark:bg-green-400/50 rounded-full blur-2xl animate-pulse"></div>
+      <div className="absolute -bottom-3 -right-3 w-16 h-16 bg-green-300/50 dark:bg-green-500/50 rounded-full blur-2xl animate-pulse delay-500"></div>
 
       <div className="relative z-10">
         {loadingNext ? (
           <div className="flex justify-center items-center h-48">
-            <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-red-500 dark:border-green-400"></div>
+            <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-green-600"></div>
           </div>
         ) : (
           <>
@@ -236,9 +196,9 @@ const Quiz = () => {
                 <button
                   key={option.id}
                   onClick={() => handleAnswer(option)}
-                  className="group text-center p-6 bg-white/50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-white dark:hover:bg-gray-700 hover:shadow-lg hover:-translate-y-1 transform transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 dark:focus:ring-green-500"
+                  className="group text-center p-6 bg-white/50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-white dark:hover:bg-gray-700 hover:shadow-lg hover:-translate-y-1 transform transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
                 >
-                  <div className="text-red-500 dark:text-green-400 group-hover:scale-110 transition-transform duration-300">
+                  <div className="text-green-600 group-hover:scale-110 transition-transform duration-300">
                     {option.icon}
                   </div>
                   <span className="font-semibold text-lg text-gray-800 dark:text-gray-100">
@@ -262,69 +222,6 @@ const Quiz = () => {
         )}
       </div>
     </div>
-  );
-};
-
-// --- Stack Grid ---
-const StackGrid = () => {
-  const stacks = [
-    { user: "sarahdrasner", tools: ["Vue", "Nuxt", "GSAP", "Netlify"] },
-    { user: "dan_abramov", tools: ["React", "Redux", "Next.js", "Vercel"] },
-    {
-      user: "kentcdodds",
-      tools: ["React", "Remix", "Testing Library", "EpicWeb.dev"],
-    },
-    { user: "wesbos", tools: ["JavaScript", "Node.js", "Svelte", "CSS Grid"] },
-    {
-      user: "tannerlinsley",
-      tools: ["React", "TanStack Query", "Vite", "TypeScript"],
-    },
-    { user: "evan_you", tools: ["Vue", "Vite", "Pinia"] },
-  ];
-
-  return (
-    <section className="py-20 sm:py-24">
-      <h3 className="text-3xl font-bold text-center text-gray-900 dark:text-white mb-12">
-        Explore Popular Stacks
-      </h3>
-      <div className="columns-2 md:columns-3 lg:columns-4 gap-6 space-y-6">
-        {stacks.map((stack, index) => (
-          <div
-            key={index}
-            className="break-inside-avoid p-6 bg-white dark:bg-gray-800/50 rounded-xl shadow-md hover:shadow-xl transition-shadow duration-300 border border-gray-200 dark:border-gray-700"
-          >
-            <div className="flex items-center space-x-4 mb-4">
-              <img
-                className="h-12 w-12 rounded-full"
-                src={`https://github.com/${stack.user}.png`}
-                alt={stack.user}
-              />
-              <div>
-                <p className="text-lg font-bold text-gray-900 dark:text-white">
-                  {stack.user}
-                </p>
-                <a
-                  href="#"
-                  className="text-sm text-red-600 dark:text-green-400 hover:underline"
-                >
-                  View Profile
-                </a>
-              </div>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              {stack.tools.map((tool) => (
-                <span
-                  key={tool}
-                  className="px-3 py-1 text-sm font-medium bg-red-100 text-red-800 dark:bg-green-900 dark:text-green-200 rounded-full"
-                >
-                  {tool}
-                </span>
-              ))}
-            </div>
-          </div>
-        ))}
-      </div>
-    </section>
   );
 };
 
@@ -358,10 +255,12 @@ const Leaderboard = () => {
                 <span className="text-lg font-bold text-gray-500 dark:text-gray-400 w-8">
                   {index + 1}
                 </span>
-                <img
+                <Image
                   className="h-12 w-12 rounded-full ml-4"
                   src={`https://github.com/${user.avatar}.png`}
                   alt={user.name}
+                  width={30}
+                  height={30}
                 />
                 <p className="ml-4 text-lg font-medium text-gray-900 dark:text-white">
                   {user.name}
@@ -378,27 +277,5 @@ const Leaderboard = () => {
         </ul>
       </div>
     </section>
-  );
-};
-
-// --- Footer ---
-const Footer = () => {
-  return (
-    <footer className="bg-gray-100 dark:bg-gray-800/50 mt-20">
-      <div className="container mx-auto py-8 px-4 sm:px-6 lg:px-8 text-center text-gray-500 dark:text-gray-400">
-        <p>&copy; {new Date().getFullYear()} DevStacks. All rights reserved.</p>
-        <div className="flex justify-center space-x-6 mt-4">
-          <a href="#" className="hover:text-gray-900 dark:hover:text-white">
-            Privacy
-          </a>
-          <a href="#" className="hover:text-gray-900 dark:hover:text-white">
-            Terms
-          </a>
-          <a href="#" className="hover:text-gray-900 dark:hover:text-white">
-            Contact
-          </a>
-        </div>
-      </div>
-    </footer>
   );
 };

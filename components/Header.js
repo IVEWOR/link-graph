@@ -1,99 +1,206 @@
+// components/Header.js
 "use client";
-import { useTheme } from "./ThemeProvider";
-import { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useTheme } from "next-themes";
+import Link from "next/link";
+import { Menu, X, Sun, Moon } from "lucide-react";
+import ScrollReveal from "./ScrollReveal";
+import Image from "next/image";
 
 export default function Header() {
-  const { theme, toggleTheme } = useTheme();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
+  const { theme, setTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => setMounted(true), []);
+
+  /* ‣ add / remove glass blur on scroll */
+  useEffect(() => {
+    const handleScroll = () => setIsScrolled(window.scrollY > 10);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  /* ‣ lock body scroll when mobile menu is open */
+  useEffect(() => {
+    document.body.style.overflow = isMenuOpen ? "hidden" : "auto";
+    return () => (document.body.style.overflow = "auto");
+  }, [isMenuOpen]);
+
+  const navLinks = [
+    { name: "Blog", href: "#" },
+    { name: "Profile", href: "#" },
+  ];
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-800">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
-          {/* Logo */}
-          <div className="flex items-center">
-            <div className="text-2xl font-bold bg-gradient-to-r from-green-400 to-green-600 bg-clip-text text-transparent">
-              linkgraph
-            </div>
-          </div>
-
-          {/* Right Menu */}
-          <div className="flex items-center space-x-4">
-            {/* Theme Toggle */}
-            <button
-              onClick={toggleTheme}
-              className="p-2 rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
-              aria-label="Toggle theme"
-            >
-              {theme === "dark" ? (
-                <svg
-                  className="w-5 h-5 text-yellow-500"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-              ) : (
-                <svg
-                  className="w-5 h-5 text-gray-700"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
-                >
-                  <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" />
-                </svg>
-              )}
-            </button>
-
-            {/* Login/Dashboard */}
-            <div className="hidden sm:flex items-center space-x-2">
-              <button className="px-4 py-2 text-gray-700 dark:text-gray-300 hover:text-green-600 dark:hover:text-green-400 transition-colors">
-                Log in
-              </button>
-              <button className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors font-medium">
-                Dashboard
-              </button>
-            </div>
-
-            {/* Mobile menu button */}
-            <button
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="sm:hidden p-2 rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
-            >
-              <svg
-                className="w-5 h-5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
+    <div className="sticky top-0 z-50 backdrop-blur-3xl">
+      <ScrollReveal>
+        <header className="max-w-full">
+          <nav
+            className={`transition-all duration-500 ${
+              isScrolled ? "glass-effect-green" : "glass-effect"
+            }`}
+          >
+            <div className="container mx-auto flex items-center justify-between px-8 py-3">
+              {/* logo */}
+              <Link
+                href="/"
+                className="flex items-center space-x-2 text-gray-900 dark:text-white group"
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M4 6h16M4 12h16M4 18h16"
+                <div className="transform transition-all duration-300 group-hover:scale-105 group-hover:rotate-3">
+                  <h1 className="text-2xl font-bold">
+                    <Image
+                      src="/linkgraphlogo.png"
+                      width={100}
+                      height={30}
+                      alt="Linkgraph"
+                    />
+                  </h1>
+                </div>
+              </Link>
+
+              {/* desktop nav */}
+              <div className="hidden md:flex items-center space-x-4">
+                {navLinks.map((link, i) => (
+                  <Link
+                    key={link.name}
+                    href={link.href}
+                    className="text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-green-500 dark:hover:text-green-400 transition-all duration-300 transform hover:scale-105 hover:-translate-y-1 relative group"
+                    style={{
+                      animationDelay: `${i * 0.1}s`,
+                      animation: "fadeInUp 0.6s ease-out forwards",
+                    }}
+                  >
+                    {link.name}
+                    <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-green-500 to-green-400 transition-all duration-300 group-hover:w-full" />
+                  </Link>
+                ))}
+              </div>
+
+              {/* CTA & Theme Toggle */}
+              <div className="hidden md:flex items-center space-x-2">
+                <Link
+                  href="#"
+                  className="bg-gradient-to-r from-green-500 to-green-600 text-white text-sm font-semibold px-4 py-1.5 rounded-xl hover:from-green-600 hover:to-green-700 transition-all duration-300 transform hover:scale-105 hover:shadow-lg hover:shadow-green-500/20"
+                >
+                  Sign In
+                </Link>
+                <button
+                  aria-label="Toggle Dark Mode"
+                  onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+                  className="p-2 rounded-full text-gray-500 dark:text-gray-400 hover:bg-gray-200/50 dark:hover:bg-gray-700/50 transition-colors"
+                >
+                  {mounted &&
+                    (theme === "dark" ? (
+                      <Sun className="h-5 w-5" />
+                    ) : (
+                      <Moon className="h-5 w-5" />
+                    ))}
+                </button>
+              </div>
+
+              {/* mobile trigger */}
+              <button
+                onClick={() => setIsMenuOpen(true)}
+                className="md:hidden text-gray-800 dark:text-gray-200 p-2 transition-all duration-300 hover:bg-green-500/10 rounded-lg"
+              >
+                <span className="sr-only">Open menu</span>
+                <Menu className="h-6 w-6 transition-transform duration-300 hover:rotate-90" />
+              </button>
+            </div>
+          </nav>
+        </header>
+      </ScrollReveal>
+
+      {/* mobile panel */}
+      <div
+        className={`fixed inset-0 z-50 md:hidden transition-all backdrop-blur-2xl duration-500 ease-in-out ${
+          isMenuOpen
+            ? "opacity-100 visible backdrop-blur-2xl bg-black"
+            : "opacity-0 invisible"
+        }`}
+      >
+        <div className="">
+          <div className="flex flex-col h-screen px-8 py-4 mx-auto bg-black">
+            <div className="flex items-center justify-between ">
+              <Link
+                href="#"
+                className="flex items-center space-x-2 text-gray-900 dark:text-white"
+              >
+                <Image
+                  src="/linkgraphlogo.png"
+                  width={100}
+                  height={30}
+                  alt="Linkgraph"
                 />
-              </svg>
-            </button>
+              </Link>
+              <button
+                onClick={() => setIsMenuOpen(false)}
+                className="text-gray-800 dark:text-gray-200 p-2 transition-all duration-300 hover:bg-green-500/10 rounded-lg"
+              >
+                <span className="sr-only">Close menu</span>
+                <X className="h-6 w-6 transition-transform duration-300 hover:rotate-90" />
+              </button>
+            </div>
+
+            <nav className="flex flex-col items-start space-y-6 mt-16 ">
+              {navLinks.map((link, i) => (
+                <Link
+                  key={link.name}
+                  href={link.href}
+                  className={`text-2xl font-medium text-gray-700 dark:text-gray-300 hover:text-green-500 dark:hover:text-green-400 transition-all duration-300 transform hover:translate-x-2 ${
+                    isMenuOpen
+                      ? "translate-x-0 opacity-100"
+                      : "-translate-x-4 opacity-0"
+                  }`}
+                  style={{
+                    transitionDelay: isMenuOpen ? `${i * 0.1}s` : "0s",
+                  }}
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  {link.name}
+                </Link>
+              ))}
+              <button
+                aria-label="Toggle Dark Mode"
+                onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+                className={`flex items-center space-x-2 text-2xl font-medium text-gray-700 dark:text-gray-300 hover:text-green-500 dark:hover:text-green-400 transition-all duration-300 transform hover:translate-x-2 ${
+                  isMenuOpen
+                    ? "translate-x-0 opacity-100"
+                    : "-translate-x-4 opacity-0"
+                }`}
+                style={{
+                  transitionDelay: isMenuOpen
+                    ? `${navLinks.length * 0.1}s`
+                    : "0s",
+                }}
+              >
+                <span>Toggle Theme</span>
+                {mounted &&
+                  (theme === "dark" ? (
+                    <Sun className="h-6 w-6 ml-2" />
+                  ) : (
+                    <Moon className="h-6 w-6 ml-2" />
+                  ))}
+              </button>
+            </nav>
+
+            <Link
+              href="#"
+              className={`mt-auto w-full bg-gradient-to-r from-green-500 to-green-600 text-white text-lg font-semibold text-center px-4 py-3 rounded-full hover:from-green-600 hover:to-green-700 transition-all duration-300 transform hover:scale-[1.02] ${
+                isMenuOpen
+                  ? "translate-y-0 opacity-100"
+                  : "translate-y-8 opacity-0"
+              }`}
+              style={{ transitionDelay: isMenuOpen ? "0.4s" : "0s" }}
+              onClick={() => setIsMenuOpen(false)}
+            >
+              Sign In
+            </Link>
           </div>
         </div>
-
-        {/* Mobile menu */}
-        {isMenuOpen && (
-          <div className="sm:hidden py-4 border-t border-gray-200 dark:border-gray-800">
-            <div className="flex flex-col space-y-2">
-              <button className="px-4 py-2 text-left text-gray-700 dark:text-gray-300 hover:text-green-600 dark:hover:text-green-400 transition-colors">
-                Log in
-              </button>
-              <button className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors font-medium text-left">
-                Dashboard
-              </button>
-            </div>
-          </div>
-        )}
       </div>
-    </header>
+    </div>
   );
 }

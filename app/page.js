@@ -17,24 +17,41 @@ import StackCarousel from "@/components/StackCarousel";
 import Footer from "@/components/Footer";
 import Header from "@/components/Header";
 import Image from "next/image";
+import AuthModal from "@/components/AuthModal";
 
 // --- Main Page Component ---
 export default function HomePage() {
+  // State is lifted up to manage the AuthModal and pending quiz data
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [pendingQuizAnswers, setPendingQuizAnswers] = useState(null);
+
   return (
-    <div className="min-h-screen transition-colors duration-500">
-      <Header />
-      <main className="px-4 sm:px-6 lg:px-8">
-        <HeroSection />
+    <div className="min-h-screen transition-colors duration-500 relative z-10">
+      <Header
+        isAuthModalOpen={isAuthModalOpen}
+        setIsAuthModalOpen={setIsAuthModalOpen}
+        pendingQuizAnswers={pendingQuizAnswers}
+        setPendingQuizAnswers={setPendingQuizAnswers}
+      />
+      <main className="container mx-auto px-4 sm:px-6 lg:px-8">
+        <HeroSection
+          setIsAuthModalOpen={setIsAuthModalOpen}
+          setPendingQuizAnswers={setPendingQuizAnswers}
+        />
         <StackCarousel />
         <Leaderboard />
       </main>
       <Footer />
+      <AuthModal
+        isOpen={isAuthModalOpen}
+        onClose={() => setIsAuthModalOpen(false)}
+      />
     </div>
   );
 }
 
 // --- Hero Section ---
-const HeroSection = () => {
+const HeroSection = ({ setIsAuthModalOpen, setPendingQuizAnswers }) => {
   return (
     <section className="text-center py-20 sm:py-28 lg:py-32">
       <h2 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-gray-900 dark:text-white tracking-tight">
@@ -45,7 +62,10 @@ const HeroSection = () => {
         what top developers are using.
       </p>
       <div className="mt-10 max-w-3xl mx-auto">
-        <Quiz />
+        <Quiz
+          setIsAuthModalOpen={setIsAuthModalOpen}
+          setPendingQuizAnswers={setPendingQuizAnswers}
+        />
       </div>
     </section>
   );

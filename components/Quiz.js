@@ -1,205 +1,187 @@
+// components/Quiz.js
 "use client";
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
+import { Code, Terminal, Database, ArrowRight } from "lucide-react";
+import { v4 as uuidv4 } from "uuid";
 
 const initialQuestions = [
   {
     id: 1,
-    question: "Which code editor do you prefer?",
+    text: "Choose your primary editor:",
     options: [
-      { id: "vim", name: "Vim", icon: "⚡" },
-      { id: "vscode", name: "VS Code", icon: "💙" },
+      {
+        id: "vscode",
+        text: "VS Code",
+        icon: <Code className="h-8 w-8 mx-auto mb-2" />,
+      },
+      {
+        id: "vim",
+        text: "Vim/Neovim",
+        icon: <Terminal className="h-8 w-8 mx-auto mb-2" />,
+      },
     ],
   },
 ];
 
-// Mock function to simulate OpenAI API call
-const generateNextQuestion = async (previousAnswers) => {
-  // This would be replaced with actual OpenAI API call
-  const mockQuestions = [
-    {
-      question: "What's your preferred programming language?",
-      options: [
-        { id: "javascript", name: "JavaScript", icon: "🟨" },
-        { id: "python", name: "Python", icon: "🐍" },
-      ],
-    },
-    {
-      question: "Which framework do you use most?",
-      options: [
-        { id: "react", name: "React", icon: "⚛️" },
-        { id: "vue", name: "Vue.js", icon: "💚" },
-      ],
-    },
-    {
-      question: "Preferred database solution?",
-      options: [
-        { id: "postgresql", name: "PostgreSQL", icon: "🐘" },
-        { id: "mongodb", name: "MongoDB", icon: "🍃" },
-      ],
-    },
-    {
-      question: "Which deployment platform?",
-      options: [
-        { id: "vercel", name: "Vercel", icon: "▲" },
-        { id: "netlify", name: "Netlify", icon: "🌐" },
-      ],
-    },
-    {
-      question: "Preferred package manager?",
-      options: [
-        { id: "npm", name: "npm", icon: "📦" },
-        { id: "yarn", name: "Yarn", icon: "🧶" },
-      ],
-    },
-  ];
-
-  return mockQuestions[previousAnswers.length - 1] || null;
-};
-
-export default function Quiz() {
-  const [currentQuestion, setCurrentQuestion] = useState(0);
+const Quiz = ({ setIsAuthModalOpen, setPendingQuizAnswers }) => {
   const [questions, setQuestions] = useState(initialQuestions);
   const [answers, setAnswers] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [showExploreButton, setShowExploreButton] = useState(false);
-  const [isExploreButtonMandatory, setIsExploreButtonMandatory] =
-    useState(false);
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const [loadingNext, setLoadingNext] = useState(false);
+  const [quizFinished, setQuizFinished] = useState(false);
 
-  const handleAnswer = async (answer) => {
-    const newAnswers = [...answers, answer];
+  const handleExploreStack = () => {
+    // Instead of saving, set the answers and open the auth modal
+    setPendingQuizAnswers(answers);
+    setIsAuthModalOpen(true);
+  };
+
+  const handleFinalAnswer = (option) => {
+    const finalAnswers = [
+      ...answers,
+      { question: questions[currentQuestionIndex].text, answer: option.text },
+    ];
+    setPendingQuizAnswers(finalAnswers);
+    setIsAuthModalOpen(true);
+    setQuizFinished(true);
+  };
+
+  const handleAnswer = (option) => {
+    const newAnswers = [
+      ...answers,
+      { question: questions[currentQuestionIndex].text, answer: option.text },
+    ];
     setAnswers(newAnswers);
-    setIsLoading(true);
 
-    // Show explore button after 4 questions
-    if (newAnswers.length >= 4) {
-      setShowExploreButton(true);
-    }
-
-    // Make explore button mandatory after 6 questions
-    if (newAnswers.length >= 6) {
-      setIsExploreButtonMandatory(true);
-      setIsLoading(false);
+    if (currentQuestionIndex >= 5) {
+      handleFinalAnswer(option);
       return;
     }
 
-    try {
-      const nextQuestion = await generateNextQuestion(newAnswers);
-      if (nextQuestion) {
-        setQuestions([
-          ...questions,
-          { id: questions.length + 1, ...nextQuestion },
-        ]);
-        setCurrentQuestion(currentQuestion + 1);
-      }
-    } catch (error) {
-      console.error("Error generating next question:", error);
-    }
-
-    setIsLoading(false);
+    setLoadingNext(true);
+    setTimeout(() => {
+      const nextQuestions = [
+        {
+          id: 2,
+          text: "Preferred Frontend Framework?",
+          options: [
+            { id: "react", text: "React" },
+            { id: "vue", text: "Vue" },
+          ],
+        },
+        {
+          id: 3,
+          text: "Your go-to Database?",
+          options: [
+            { id: "postgres", text: "PostgreSQL" },
+            { id: "mongo", text: "MongoDB" },
+          ],
+        },
+        {
+          id: 4,
+          text: "Cloud Platform?",
+          options: [
+            { id: "aws", text: "AWS" },
+            { id: "gcp", text: "Google Cloud" },
+          ],
+        },
+        {
+          id: 5,
+          text: "Primary Language?",
+          options: [
+            { id: "js", text: "JavaScript" },
+            { id: "python", text: "Python" },
+          ],
+        },
+        {
+          id: 6,
+          text: "State Management?",
+          options: [
+            { id: "redux", text: "Redux" },
+            { id: "zustand", text: "Zustand" },
+          ],
+        },
+      ];
+      const nextQ = {
+        ...nextQuestions[currentQuestionIndex],
+        options: nextQuestions[currentQuestionIndex].options.map((o) => ({
+          ...o,
+          icon: <Code className="h-8 w-8 mx-auto mb-2" />,
+        })),
+      };
+      setQuestions([...questions, nextQ]);
+      setCurrentQuestionIndex(currentQuestionIndex + 1);
+      setLoadingNext(false);
+    }, 1000);
   };
 
-  const handleExploreStack = () => {
-    // Save answers to localStorage
-    localStorage.setItem("quizAnswers", JSON.stringify(answers));
-
-    // Show success message or redirect
-    alert("Your stack preferences have been saved! 🎉");
-
-    // Reset quiz
-    setCurrentQuestion(0);
-    setQuestions(initialQuestions);
-    setAnswers([]);
-    setShowExploreButton(false);
-    setIsExploreButtonMandatory(false);
-  };
-
-  if (isExploreButtonMandatory) {
+  if (quizFinished) {
     return (
-      <div className="text-center">
-        <div className="mb-8">
-          <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
-            Quiz Complete! 🎉
-          </h3>
-          <p className="text-gray-600 dark:text-gray-400 mb-6">
-            {
-              "We've gathered enough information to create your personalized stack."
-            }
-          </p>
-        </div>
-        <button
-          onClick={handleExploreStack}
-          className="px-8 py-4 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white rounded-xl font-semibold text-lg transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl"
-        >
-          Explore Your Stack
-        </button>
+      <div className="bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm border border-gray-200 dark:border-gray-700 rounded-xl p-8 shadow-2xl shadow-green-500/10 text-center">
+        <h3 className="text-2xl font-bold text-gray-900 dark:text-white">
+          Processing your results...
+        </h3>
+        <p className="mt-2 text-gray-600 dark:text-gray-300">
+          Please sign in or sign up to create your profile.
+        </p>
       </div>
     );
   }
 
-  const question = questions[currentQuestion];
+  // ... rest of the component rendering is the same
+  const currentQuestion = questions[currentQuestionIndex];
+  const showExploreButton = answers.length >= 4;
 
   return (
-    <div className="max-w-2xl mx-auto">
-      {/* Progress Bar */}
-      <div className="mb-8">
-        <div className="flex justify-between text-sm text-gray-600 dark:text-gray-400 mb-2">
-          <span>Question {currentQuestion + 1}</span>
-          <span>{answers.length} answers</span>
-        </div>
-        <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-          <div
-            className="bg-gradient-to-r from-green-400 to-green-600 h-2 rounded-full transition-all duration-500"
-            style={{ width: `${Math.min((answers.length / 6) * 100, 100)}%` }}
-          />
-        </div>
-      </div>
+    <div className="relative bg-white/30 dark:bg-gray-800/30 backdrop-blur-xl border-green-400/20 dark:border-green-400/30 rounded-2xl p-6 sm:p-8 shadow-2xl shadow-green-500/10 transition-all duration-500">
+      <div className="absolute -top-3 -left-3 w-16 h-16 bg-green-300/50 dark:bg-green-400/50 rounded-full blur-2xl animate-pulse"></div>
+      <div className="absolute -bottom-3 -right-3 w-16 h-16 bg-green-300/50 dark:bg-green-500/50 rounded-full blur-2xl animate-pulse delay-500"></div>
 
-      {/* Question */}
-      <div className="text-center mb-8">
-        <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-          {question?.question}
-        </h2>
-        <p className="text-gray-600 dark:text-gray-400">
-          Choose the option that best fits your preference
-        </p>
-      </div>
+      <div className="relative z-10">
+        {loadingNext ? (
+          <div className="flex justify-center items-center h-48">
+            <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-green-600"></div>
+          </div>
+        ) : (
+          <>
+            <p className="font-semibold text-gray-700 dark:text-gray-200 mb-1">
+              Question {currentQuestionIndex + 1}/{6}
+            </p>
+            <h3 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-6">
+              {currentQuestion.text}
+            </h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {currentQuestion.options.map((option) => (
+                <button
+                  key={option.id}
+                  onClick={() => handleAnswer(option)}
+                  className="group text-center p-6 bg-white/50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-white dark:hover:bg-gray-700 hover:shadow-lg hover:-translate-y-1 transform transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+                >
+                  <div className="text-green-600 group-hover:scale-110 transition-transform duration-300">
+                    {option.icon}
+                  </div>
+                  <span className="font-semibold text-lg text-gray-800 dark:text-gray-100">
+                    {option.text}
+                  </span>
+                </button>
+              ))}
+            </div>
+          </>
+        )}
 
-      {/* Options */}
-      {isLoading ? (
-        <div className="flex justify-center items-center py-12">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-500"></div>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
-          {question?.options.map((option) => (
+        {showExploreButton && !quizFinished && (
+          <div className="mt-8 text-center">
             <button
-              key={option.id}
-              onClick={() => handleAnswer(option)}
-              className="p-6 border-2 border-gray-200 dark:border-gray-700 rounded-xl hover:border-green-500 dark:hover:border-green-500 hover:bg-green-50 dark:hover:bg-green-900/20 transition-all duration-200 group"
+              onClick={handleExploreStack}
+              className="w-full sm:w-auto inline-flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-all duration-300"
             >
-              <div className="text-3xl mb-3">{option.icon}</div>
-              <div className="text-lg font-semibold text-gray-900 dark:text-white group-hover:text-green-600 dark:group-hover:text-green-400">
-                {option.name}
-              </div>
+              Explore Stack <ArrowRight className="ml-2 -mr-1 h-5 w-5" />
             </button>
-          ))}
-        </div>
-      )}
-
-      {/* Explore Stack Button */}
-      {showExploreButton && !isExploreButtonMandatory && (
-        <div className="text-center">
-          <button
-            onClick={handleExploreStack}
-            className="px-6 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors"
-          >
-            Explore Stack
-          </button>
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
-            Or continue for more personalized results
-          </p>
-        </div>
-      )}
+          </div>
+        )}
+      </div>
     </div>
   );
-}
+};
+
+export default Quiz;

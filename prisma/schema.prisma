@@ -17,9 +17,13 @@ model User {
   name          String?
   createdAt     DateTime     @default(now())
   socialLinks   Json?
+  isProfilePublic Boolean @default(true)
   quizResponses QuizResponse[]
   // Link to UserStack (the join table)
   stacks        UserStack[]
+  following Follows[] @relation("Following")
+  followers Follows[] @relation("Followers")
+  
 }
 
 // This Table replaces your old "RecommendedStack"
@@ -46,6 +50,17 @@ model UserStack {
   @@id([userId, itemId])               // composite primary key
 }
 
+// Add this to your schema
+model Follows {
+  followerId String
+  followingId String
+
+  follower  User @relation("Following", fields: [followerId], references: [id])
+  following User @relation("Followers", fields: [followingId], references: [id])
+
+  @@id([followerId, followingId])
+}
+
 model QuizResponse {
   id            String   @id @default(uuid())
   userId        String?  
@@ -53,6 +68,5 @@ model QuizResponse {
   questionPairs Json
   chosen        Json
   createdAt     DateTime @default(now())
-
   user          User?    @relation(fields: [userId], references: [id])
 }

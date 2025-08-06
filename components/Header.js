@@ -62,22 +62,19 @@ export default function Header({
     return () => subscription.unsubscribe();
   }, [pendingQuizAnswers, setPendingQuizAnswers, router, setIsAuthModalOpen]);
 
-  // ... other useEffects remain the same ...
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
     router.push("/"); // Redirect to home on sign out
   };
 
-  // ... rest of the component is the same ...
   return (
     <div className="sticky top-0 z-50">
       <ScrollReveal>
         <header className="max-w-full">
           <nav
-            className={`border-b border-green-500/20 shadow-lg transition-all duration-500 ${
-              isScrolled ? "glass-effect-green" : "glass-effect"
-            }`}
+            className={`border-b border-green-500/20 shadow-lg transition-all duration-500 ${isScrolled ? "glass-effect-green" : "glass-effect"
+              }`}
           >
             <div className="container mx-auto flex items-center justify-between h-18 px-8 py-2">
               <Link
@@ -93,10 +90,9 @@ export default function Header({
                 {session ? (
                   <div className="flex items-center space-x-4">
                     <Link
-                      href={`/${
-                        session.user.user_metadata.user_name ||
+                      href={`/${session.user.user_metadata.user_name ||
                         session.user.email.split("@")[0]
-                      }`}
+                        }`}
                       className="flex items-center space-x-2 text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-green-500 dark:hover:text-green-400"
                     >
                       <User className="h-5 w-5" />
